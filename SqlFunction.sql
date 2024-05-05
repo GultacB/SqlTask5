@@ -21,29 +21,28 @@ SELECT * FROM dbo.MyFunction1('BHV')
 
 --2--
 
-CREATE FUNCTION MyFunction2(@Number INT)
+ALTER FUNCTION MyFunction2(@Number INT)
 RETURNS TABLE
 AS
    RETURN  SELECT Press.Name as PressName
            FROM Books
            JOIN Press ON Id_Press=Press.Id
-           WHERE Books.Pages>@Number
            GROUP BY Press.Name
+		   HAVING AVG(Books.Pages)>@Number
 
 --for to check--
 
-SELECT * FROM dbo.MyFunction2(599)
+SELECT * FROM dbo.MyFunction2(400)
 
 --3--
 
-CREATE FUNCTION MyFunction3(@PressName NVARCHAR(40))
+ALTER FUNCTION MyFunction3(@PressName NVARCHAR(40))
 RETURNS TABLE
 AS 
    RETURN SELECT SUM(Books.Pages) AS TotalPageCount
           FROM Books
           JOIN Press ON Id_Press=Press.Id
-          GROUP BY Press.Name
-          HAVING Press.Name=@PressName
+          WHERE Press.Name=@PressName                 
  
 		  --for to check--
 
@@ -108,46 +107,41 @@ SELECT * FROM dbo.MyFunction7()
 
 --8--
 
-ALTER FUNCTION MyFunction8()
+CREATE FUNCTION MyFunction8()
 RETURNS TABLE
-AS
-  RETURN 
-      SELECT CONCAT(Students.FirstName,' ',Students.LastName) AS StudentFullName,Books.Name as BookName
-      FROM S_Cards
-      JOIN Students ON S_Cards.Id_Student=Students.Id
-      JOIN Books ON S_Cards.Id_Book=Books.Id
-	  
-SELECT * FROM MyFunction8()
+AS 
+ RETURN
+     SELECT CONCAT(Students.FirstName,' ',Students.LastName) AS Membres,Books.Name as BookName 
+     FROM  S_Cards 
+     JOIN Students ON S_Cards.Id_Student=Students.Id
+     JOIN Books ON S_Cards.Id_Book=Books.Id
+     UNION
+     SELECT CONCAT(Teachers.FirstName,' ',Teachers.LastName) AS Membres ,Books.Name as BookName 
+     FROM  T_Cards
+     JOIN Teachers ON T_Cards.Id_Teacher=Teachers.Id
+     JOIN Books ON T_Cards.Id_Book=Books.Id
 
---for teachers--
+	 --for to check--
+SELECT * FROM dbo.MyFunction8()
 
-CREATE FUNCTION MyFunctionT8()
-RETURNS TABLE 
-AS  
-      RETURN  SELECT CONCAT(Teachers.FirstName,' ',Teachers.LastName) AS TeacherFullName,Books.Name as BookName
-              FROM T_Cards
-              JOIN Teachers ON T_Cards.Id_Teacher=Teachers.Id
-              JOIN Books ON T_Cards.Id_Book=Books.Id
-	  
-SELECT * FROM MyFunctionT8()
 
 --9--
 
-CREATE FUNCTION StudentCount()
+ALTER FUNCTION StudentCount()
 RETURNS TABLE
 AS 
     RETURN 
-        SELECT (SELECT COUNT(CONCAT(Students.FirstName,' ',Students.LastName)) FROM Students) - 
-		(SELECT COUNT(CONCAT(Students.FirstName,' ',Students.LastName)) FROM S_Cards JOIN Students ON S_Cards.Id_Student=Students.Id) AS NotTakeBookStudentCount
+        SELECT (SELECT COUNT(Students.Id) FROM Students) - 
+		(SELECT COUNT(Students.Id) FROM S_Cards JOIN Students ON S_Cards.Id_Student=Students.Id) AS NotTakeBookStudentCount
 		
 --for to check--
 SELECT* FROM dbo.StudentCount()		
         
      
      
+	  
 
-	  
-	  
-     
+
+
 	
 	  
